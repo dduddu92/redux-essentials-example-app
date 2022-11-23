@@ -1,38 +1,64 @@
 import React, { useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+
+import { postAdded } from './postsSlice'
 
 export const AddPostForm = () => {
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
+  const [userId, setUserId] = useState('')
 
-  const onTitleChanged = (event) => {
-    const value = event.target
-    setTitle(value)
+  const dispatch = useDispatch()
+  const users = useSelector((state) => state.users)
+
+  const onTitleChanged = (e) => setTitle(e.target.value)
+  const onContentChanged = (e) => setContent(e.target.value)
+  const onAuthorChanged = (e) => setUserId(e.target.value)
+
+  const onSavePostClicked = () => {
+    if (title && content) {
+      dispatch(postAdded(title, content, userId))
+      setTitle('')
+      setContent('')
+    }
   }
 
-  const onContentChanged = (event) => {
-    const value = event.target
-  }
+  const canSave = Boolean(title) && Boolean(content) && Boolean(userId)
+
+  const usersOptions = users.map((user) => (
+    <option key={user.id} value={user.id}>
+      {user.name}
+    </option>
+  ))
 
   return (
     <section>
-      <h2>새 게시글 추가하기</h2>
+      <h2>Add a New Post</h2>
       <form>
-        <label htmlFor="postTitle">게시글 제목:</label>
+        <label htmlFor="postTitle">Post Title:</label>
         <input
           type="text"
           id="postTitle"
           name="postTitle"
+          placeholder="What's on your mind?"
           value={title}
           onChange={onTitleChanged}
-        ></input>
-        <label htmlFor="postContent">내용:</label>
+        />
+        <label htmlFor="postAuthor">Author:</label>
+        <select id="postAuthor" value={userId} onChange={onAuthorChanged}>
+          <option value=""></option>
+          {usersOptions}
+        </select>
+        <label htmlFor="postContent">Content:</label>
         <textarea
           id="postContent"
           name="postContent"
           value={content}
           onChange={onContentChanged}
         />
-        <button type="button">게시물 저장하기</button>
+        <button type="button" onClick={onSavePostClicked} disabled={!canSave}>
+          Save Post
+        </button>
       </form>
     </section>
   )
